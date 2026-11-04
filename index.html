@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FitLog</title>
+  <meta name="description" content="Personal nutrition and gym tracker. Your data stays on this phone.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FitLog">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0E1B2C">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-row">
+      <h1 class="topbar-title" id="topbar-title">Setup check</h1>
+      <button class="icon-btn" id="btn-settings" type="button" aria-label="Settings" hidden>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/></svg>
+      </button>
+      <button class="icon-btn text-btn" id="btn-done" type="button">Done</button>
+    </div>
+  </header>
+
+  <main>
+    <noscript><p class="empty">FitLog needs JavaScript to run.</p></noscript>
+
+    <section class="view" id="view-nutrition" hidden>
+      <div class="empty">
+        <h2>Nutrition comes next</h2>
+        <p>The food diary, meal builder and photo logging are built in the next phases. Until then, the setup check confirms that FitLog installs and works offline on this phone.</p>
+        <button class="btn" type="button" data-open-settings>Open setup check</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-gym" hidden>
+      <div class="empty">
+        <h2>Gym comes after Nutrition</h2>
+        <p>Workouts, records and progress charts are built once the Nutrition section is finished.</p>
+        <button class="btn" type="button" data-open-settings>Open setup check</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-settings">
+      <div class="verdict" id="verdict" data-state="idle">
+        <p class="verdict-title" id="verdict-title">Checking this phone…</p>
+        <p class="verdict-text" id="verdict-text">This takes a few seconds.</p>
+        <ul class="strip" id="check-strip" aria-label="Check results"></ul>
+      </div>
+
+      <div class="banner" id="update-banner" hidden>
+        <div>
+          <strong>Update ready</strong>
+          <span id="update-banner-text">A new version is ready.</span>
+        </div>
+        <button class="btn btn-small" id="btn-apply-update" type="button">Apply update</button>
+      </div>
+
+      <h2 class="group-title">Install and offline</h2>
+      <div class="list">
+        <div class="row"><span class="row-label">Opened as</span><span class="row-value" id="v-display"></span></div>
+        <div class="row"><span class="row-label">Service worker</span><span class="row-value" id="v-sw"></span></div>
+        <div class="row"><span class="row-label">Offline files</span><span class="row-value" id="v-cache"></span></div>
+        <div class="row"><span class="row-label">Connection</span><span class="row-value" id="v-online"></span></div>
+      </div>
+      <p class="footnote">Open FitLog from its Home Screen icon to run these checks as the installed app. A Safari tab keeps separate storage.</p>
+
+      <h2 class="group-title">Storage</h2>
+      <div class="list">
+        <div class="row"><span class="row-label">Database</span><span class="row-value" id="v-db"></span></div>
+        <div class="row"><span class="row-label">Data kept</span><span class="row-value" id="v-kept"></span></div>
+        <div class="row"><span class="row-label">Persistent storage</span><span class="row-value" id="v-persist"></span></div>
+        <button class="row row-button" id="btn-persist" type="button" hidden>Request persistent storage</button>
+        <div class="row"><span class="row-label">Space used</span><span class="row-value" id="v-space"></span></div>
+        <div class="row"><span class="row-label">First opened</span><span class="row-value" id="v-first"></span></div>
+        <div class="row"><span class="row-label">Times opened</span><span class="row-value" id="v-count"></span></div>
+      </div>
+
+      <h2 class="group-title">Test notes</h2>
+      <div class="list" id="notes-list">
+        <form class="row row-input" id="note-form" autocomplete="off">
+          <input id="note-input" type="text" maxlength="120" placeholder="Write a note to test storage" enterkeyhint="done" aria-label="Test note">
+          <button class="btn btn-small" type="submit">Add</button>
+        </form>
+      </div>
+      <p class="footnote">Notes are real stored data. Close FitLog, reopen it, and they should still be here. They are included in backups.</p>
+
+      <h2 class="group-title">Backup</h2>
+      <div class="list">
+        <button class="row row-button" id="btn-create-backup" type="button">Create backup</button>
+        <div class="row" id="backup-summary" hidden><span class="row-label">Backup ready</span><span class="row-value" id="backup-summary-text"></span></div>
+        <button class="row row-button" id="btn-share-backup" type="button" hidden>Save to Files</button>
+        <button class="row row-button" id="btn-copy-backup" type="button" hidden>Copy as text</button>
+        <button class="row row-button" id="btn-download-backup" type="button" hidden>Download file</button>
+      </div>
+      <p class="footnote" id="backup-status" role="status">Create a backup, then save it to Files or iCloud Drive.</p>
+      <textarea class="paste outside" id="backup-fallback" readonly hidden aria-label="Backup text to copy manually"></textarea>
+
+      <h2 class="group-title">Restore</h2>
+      <div class="list">
+        <label class="row row-button" for="restore-file">Choose backup file…</label>
+        <input class="visually-hidden" id="restore-file" type="file">
+        <details>
+          <summary class="row row-button">Paste backup text instead</summary>
+          <div class="row-block">
+            <textarea class="paste" id="restore-text" placeholder="Paste the backup text here" aria-label="Backup text"></textarea>
+            <button class="btn btn-small" id="btn-check-pasted" type="button">Check pasted text</button>
+          </div>
+        </details>
+        <div class="list-inner" id="restore-result" hidden></div>
+        <button class="row row-button danger" id="btn-restore" type="button" hidden>Replace my data with this backup</button>
+        <button class="row row-button" id="btn-undo-restore" type="button" hidden>Undo last restore</button>
+      </div>
+      <p class="footnote" id="restore-status" role="status">Restoring replaces everything in FitLog on this phone. A safety copy is kept so you can undo once.</p>
+
+      <h2 class="group-title">Updates</h2>
+      <div class="list">
+        <div class="row"><span class="row-label">Version</span><span class="row-value" id="v-version"></span></div>
+        <button class="row row-button" id="btn-check-update" type="button">Check for updates</button>
+      </div>
+      <p class="footnote" id="update-status" role="status">Updates never erase your data. They wait until you tap Apply update.</p>
+
+      <h2 class="group-title">This phone</h2>
+      <div class="list">
+        <div class="row"><span class="row-label">System</span><span class="row-value" id="v-system"></span></div>
+        <div class="row"><span class="row-label">Screen</span><span class="row-value" id="v-screen"></span></div>
+        <div class="row"><span class="row-label">Safe areas</span><span class="row-value" id="v-insets"></span></div>
+        <div class="row"><span class="row-label">Save to Files</span><span class="row-value" id="v-share"></span></div>
+        <div class="row"><span class="row-label">Copy to clipboard</span><span class="row-value" id="v-clipboard"></span></div>
+        <div class="row"><span class="row-label">Keep screen awake</span><span class="row-value" id="v-wake"></span></div>
+        <button class="row row-button" id="btn-copy-report" type="button">Copy all results</button>
+      </div>
+      <textarea class="paste outside" id="report-fallback" readonly hidden aria-label="Results to copy manually"></textarea>
+      <p class="footnote">FitLog sends nothing anywhere. Your data stays on this phone.</p>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Sections">
+    <button class="tab" type="button" data-tab="nutrition" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v6a2.5 2.5 0 0 0 5 0V3"/><path d="M9.5 3v18"/><path d="M17.5 21V3c-2.2 1.2-3.5 3.8-3.5 7v3h3.5"/></svg>
+      <span>Nutrition</span>
+    </button>
+    <button class="tab" type="button" data-tab="gym" aria-current="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
+      <span>Gym</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-message"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-quiet" value="cancel">Cancel</button>
+        <button class="btn" id="confirm-ok" value="ok">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="version.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
